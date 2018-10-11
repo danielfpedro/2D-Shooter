@@ -7,26 +7,60 @@ public class WeaponController : MonoBehaviour
     public HeroController hero;
     public GameObject bullet;
 
+    public LayerMask canBeShoted;
+
+    public ParticleSystem impactEffect;
+
+    public LineRenderer lineRenderer;
+
+    // private AudioSource audioSource;
+    public AudioClip audioClip;
+
+    [Range(0.1f, 30f)]
+    public float fireRate = 10f;
+    private float nextFire;
+
+    void Start()
+    {
+    }
+
     void Update()
     {
-        if (Input.GetButton("Fire1"))
+ 
+        Debug.DrawRay(transform.position, transform.right * 100f);
+
+        if (Input.GetButton("Fire1") && Time.time >= nextFire)
         {
-            GameObject bulletInstance = Instantiate(bullet);
-
-            bulletInstance.transform.position = transform.position;
-            
-            BulletController bulletController = bulletInstance.GetComponent<BulletController>();
-
-            if (hero.facingVertical != 0)
-            {
-                bulletController.horizontalShot = false;
-                bulletController.shotMultiplier = hero.facingVertical;
-                bulletInstance.transform.rotation = Quaternion.Euler(0, 0, 90);
-
-            } else {
-                bulletController.horizontalShot = true;
-                bulletController.shotMultiplier = hero.facingHorizontal;
-            }
+            nextFire = Time.time + 1f / fireRate;
+            StartCoroutine(Shoot());
         }
+    }
+
+    IEnumerator Shoot()
+    {
+        AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.clip = audioClip;
+        audioSource.volume = .5f;
+        audioSource.pitch = Random.Range(.6f, 1f);
+        audioSource.playOnAwake = false;
+        audioSource.Play();
+        Destroy(audioSource, audioClip.length);
+
+        Debug.Log("Shootin");
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, canBeShoted);
+
+        if (hit)
+        {
+        } else {
+        }
+
+        lineRenderer.SetPosition(0, transform.position);
+        lineRenderer.SetPosition(1, transform.position + transform.right * 1f);
+
+        lineRenderer.enabled = true;
+
+        yield return 0;
+
+        lineRenderer.enabled = false;
     }
 }
