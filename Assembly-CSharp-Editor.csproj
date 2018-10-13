@@ -54,7 +54,6 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Shared\Ramps\Editor\RampAssetEditor.cs" />
-     <Compile Include="Assets\TutorialInfo\Scripts\Editor\ReadmeEditor.cs" />
      <None Include="Assets\Editor\PackageManagerAssembly\PackageImportList.txt" />
  <Reference Include="Unity.ProGrids">
  <HintPath>D:/Users/danie/documents/github/2D Shooter/Library/ScriptAssemblies/Unity.ProGrids.dll</HintPath>

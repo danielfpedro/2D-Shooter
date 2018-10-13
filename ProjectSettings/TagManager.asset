@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Shootable
+  - Enemy
+  - SolidObject
   layers:
   - Default
   - TransparentFX
@@ -17,10 +19,10 @@ TagManager:
   - Lighting
   - Ground
   - Postprocessing
-  - 
-  - 
-  - 
-  - 
+  - Enemy
+  - Player
+  - Effect
+  - SolidObject
   - 
   - 
   - 

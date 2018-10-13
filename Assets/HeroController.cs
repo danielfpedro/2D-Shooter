@@ -14,20 +14,24 @@ public class HeroController : MonoBehaviour
 
     public Vector2 currentPosition;
 
-
+    public Vector3 upPosition = Vector3.zero;
+    public Vector3 horizontalPosition;
 
     public float bodyHorizontalOrientation = 1f;
     public float verticalBodyHorientation = 0f;
 
     public bool facingRight = true;
 
+    public GameObject verticalWeapon;
+    public GameObject horizontalWeapon;
+
     // Start is called before the first frame update
     void Start()
     {
+        verticalWeapon.SetActive(false);
+        horizontalWeapon.SetActive(true);
 
-        Vector3 theScale = transform.localScale;
-        theScale.x = -1;
-        transform.localScale = theScale;
+        horizontalPosition = weapon.transform.position;
 
         currentPosition = new Vector2(1, 0);
 
@@ -104,72 +108,69 @@ public class HeroController : MonoBehaviour
 
         if (Input.GetAxisRaw("Horizontal") != 0f)
         {
+            verticalWeapon.SetActive(false);
+            horizontalWeapon.SetActive(true);
+
+            WeaponController weaponController = weapon.GetComponent<WeaponController>();
+            weaponController.muzzle = weaponController.horizontalMuzzle;
+
             float deslocation = (Input.GetAxisRaw("Horizontal") > 0) ? 1f : -1f;
             float nextPosition = deslocation;
-            bool flipou = false;
+
             if ((nextPosition == -1 && facingRight) || (nextPosition == 1 && !facingRight))
             {
-                FlipBodyHorizontaly();
                 facingRight = !facingRight;
-                flipou = true;
             }
 
-            if (currentPosition.y != 0)
+            if (deslocation > 0)
             {
-                FlipWeaponHorizontal(nextPosition, flipou);
-            }
-            currentPosition = new Vector3(nextPosition, 0f);
-        }
-        else if (Input.GetAxisRaw("Vertical") != 0f)
-        {
-            float deslocation = (Input.GetAxisRaw("Vertical") > 0) ? 1f : -1f;
-            float nextPosition = deslocation;
-            if (nextPosition != currentPosition.y)
-            {
-                FlipWeaponVertical(nextPosition);
-            }
-            
-            currentPosition = new Vector3(0f, nextPosition);
-        }
-    }
-
-    void FlipBodyHorizontaly()
-    {
-        transform.Rotate(0f, 180f, 0f);
-    }
-    void FlipWeaponHorizontal(float nextPosition, bool flipou)
-    {
-        if (currentPosition.y == 1)
-        {
-            if (flipou)
-            {
-                weapon.Rotate(0f, 0f, 90f);
-            }
-            else {
-                weapon.Rotate(0f, 0f, 90f * nextPosition);
-            }
-        }
-        else {
-            if (flipou)
-            {
-                weapon.Rotate(0f, 0f, -90f);
+                transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
             }
             else
             {
-                weapon.Rotate(0f, 0f, -90f * nextPosition);
+                transform.rotation = Quaternion.Euler(new Vector3(0, -180, 0));
             }
-        }
-        
+            weapon.transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z));
+            currentPosition = new Vector3(nextPosition, 0f);
 
-    }
-    void FlipWeaponVertical(float nextPosition)
-    {
-        if (currentPosition.x != 0)
+
+            animator.SetBool("RunningHorizontal", true);
+            animator.SetBool("RunningUp", false);
+            animator.SetBool("RunningDown", false);
+        }
+        else if (Input.GetAxisRaw("Vertical") != 0f)
         {
-            weapon.Rotate(0f, 0f, -90f * nextPosition);
-        } else
-        {
-            weapon.Rotate(0f, 0f, 180f * nextPosition);
+            verticalWeapon.SetActive(true);
+            horizontalWeapon.SetActive(false);
+
+            float deslocation = (Input.GetAxisRaw("Vertical") > 0) ? 1f : -1f;
+            float nextPosition = deslocation;
+
+            SpriteRenderer weaponSprite = verticalWeapon.GetComponent<SpriteRenderer>();
+            if (deslocation > 0)
+            {
+                verticalWeapon.SetActive(false);
+
+                animator.SetBool("RunningUp", true);
+                animator.SetBool("RunningDown", false);
+            } else {
+                animator.SetBool("RunningUp", false);
+                animator.SetBool("RunningDown", true);
+            }
+
+            WeaponController weaponController = weapon.GetComponent<WeaponController>();
+            weaponController.muzzle = weaponController.verticalMuzzle;
+
+            weapon.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90 * nextPosition));
+            weapon.position = transform.position + upPosition;
+            currentPosition = new Vector3(0f, nextPosition);
+
+            animator.SetBool("RunningHorizontal", false);
+        }
+        else {
+            animator.SetBool("RunningHorizontal", false);
+            animator.SetBool("RunningUp", false);
+            animator.SetBool("RunningDown", false);
         }
     }
 }
