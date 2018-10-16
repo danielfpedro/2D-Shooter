@@ -8,6 +8,8 @@ public class HeroController : MonoBehaviour
     public int facingHorizontal;
     public int facingVertical;
 
+
+    public bool locked = false;
     public Transform weapon;
 
     private Animator animator;
@@ -28,9 +30,6 @@ public class HeroController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        verticalWeapon.SetActive(false);
-        horizontalWeapon.SetActive(true);
-
         horizontalPosition = weapon.transform.position;
 
         currentPosition = new Vector2(1, 0);
@@ -43,58 +42,6 @@ public class HeroController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /**
-        if (Input.GetAxisRaw("Horizontal") > 0)
-        {
-            transform.position += Vector3.right * speed * Time.deltaTime;
-            facingHorizontal = 1;
-            facingVertical = 0;
-        }
-        if (Input.GetAxisRaw("Horizontal") < 0)
-        {
-            transform.position += Vector3.left * speed * Time.deltaTime;
-            facingHorizontal = -1; facingVertical = 0;
-            facingVertical = 0;
-        }
-        if (Input.GetAxisRaw("Vertical") < 0)
-        {
-            transform.position += Vector3.down * speed * Time.deltaTime;
-            facingVertical = -1;
-        }
-        if (Input.GetAxisRaw("Vertical") > 0)
-        {
-            transform.position += Vector3.up * speed * Time.deltaTime;
-            facingVertical = 1;
-        }
-
-        if (Input.GetAxisRaw("Vertical") > 0)
-        {
-            animator.SetBool("RunningUp", true);
-        }
-        else
-        {
-            animator.SetBool("RunningUp", false);
-        }
-
-        if (Input.GetAxisRaw("Vertical") < 0)
-        {
-            animator.SetBool("RunningDown", true);
-        }
-        else
-        {
-            animator.SetBool("RunningDown", false);
-        }
-
-        if (Input.GetAxisRaw("Horizontal") != 0)
-        {
-            animator.SetBool("Running", true);
-            animator.SetBool("RunningUp", false);
-        }
-        else
-        {
-            animator.SetBool("Running", false);
-        }**/
-
         if (Input.GetAxisRaw("Horizontal") != 0f)
         {
             float deslocation = (Input.GetAxisRaw("Horizontal") > 0) ? 1f : -1f;
@@ -106,71 +53,78 @@ public class HeroController : MonoBehaviour
             transform.position += (Vector3.up * deslocation) * speed * Time.deltaTime;
         }
 
-        if (Input.GetAxisRaw("Horizontal") != 0f)
+        locked = Input.GetButton("LockAim");
+
+        if (!locked)
         {
-            verticalWeapon.SetActive(false);
-            horizontalWeapon.SetActive(true);
-
-            WeaponController weaponController = weapon.GetComponent<WeaponController>();
-            weaponController.muzzle = weaponController.horizontalMuzzle;
-
-            float deslocation = (Input.GetAxisRaw("Horizontal") > 0) ? 1f : -1f;
-            float nextPosition = deslocation;
-
-            if ((nextPosition == -1 && facingRight) || (nextPosition == 1 && !facingRight))
+            if (Input.GetAxisRaw("Horizontal") != 0f)
             {
-                facingRight = !facingRight;
-            }
+                // verticalWeapon.SetActive(false);
+                // horizontalWeapon.SetActive(true);
 
-            if (deslocation > 0)
-            {
-                transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
-            }
-            else
-            {
-                transform.rotation = Quaternion.Euler(new Vector3(0, -180, 0));
-            }
-            weapon.transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z));
-            currentPosition = new Vector3(nextPosition, 0f);
+                WeaponController weaponController = weapon.GetComponent<WeaponController>();
+                // weaponController.muzzle = weaponController.horizontalMuzzle;
+
+                float deslocation = (Input.GetAxisRaw("Horizontal") > 0) ? 1f : -1f;
+                float nextPosition = deslocation;
+
+                if ((nextPosition == -1 && facingRight) || (nextPosition == 1 && !facingRight))
+                {
+                    facingRight = !facingRight;
+                }
+
+                if (deslocation > 0)
+                {
+                    transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+                }
+                else
+                {
+                    transform.rotation = Quaternion.Euler(new Vector3(0, -180, 0));
+                }
+                weapon.transform.rotation = Quaternion.Euler(new Vector3(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z));
+                currentPosition = new Vector3(nextPosition, 0f);
 
 
-            animator.SetBool("RunningHorizontal", true);
-            animator.SetBool("RunningUp", false);
-            animator.SetBool("RunningDown", false);
-        }
-        else if (Input.GetAxisRaw("Vertical") != 0f)
-        {
-            verticalWeapon.SetActive(true);
-            horizontalWeapon.SetActive(false);
-
-            float deslocation = (Input.GetAxisRaw("Vertical") > 0) ? 1f : -1f;
-            float nextPosition = deslocation;
-
-            SpriteRenderer weaponSprite = verticalWeapon.GetComponent<SpriteRenderer>();
-            if (deslocation > 0)
-            {
-                verticalWeapon.SetActive(false);
-
-                animator.SetBool("RunningUp", true);
-                animator.SetBool("RunningDown", false);
-            } else {
+                animator.SetBool("RunningHorizontal", true);
                 animator.SetBool("RunningUp", false);
-                animator.SetBool("RunningDown", true);
+                animator.SetBool("RunningDown", false);
             }
+            else if (Input.GetAxisRaw("Vertical") != 0f)
+            {
+                // verticalWeapon.SetActive(true);
+                // horizontalWeapon.SetActive(false);
 
-            WeaponController weaponController = weapon.GetComponent<WeaponController>();
-            weaponController.muzzle = weaponController.verticalMuzzle;
+                float deslocation = (Input.GetAxisRaw("Vertical") > 0) ? 1f : -1f;
+                float nextPosition = deslocation;
 
-            weapon.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90 * nextPosition));
-            weapon.position = transform.position + upPosition;
-            currentPosition = new Vector3(0f, nextPosition);
+                // SpriteRenderer weaponSprite = verticalWeapon.GetComponent<SpriteRenderer>();
+                if (deslocation > 0)
+                {
+                    // verticalWeapon.SetActive(false);
 
-            animator.SetBool("RunningHorizontal", false);
+                    animator.SetBool("RunningUp", true);
+                    animator.SetBool("RunningDown", false);
+                } else {
+                    animator.SetBool("RunningUp", false);
+                    animator.SetBool("RunningDown", true);
+                }
+
+                // WeaponController weaponController = weapon.GetComponent<WeaponController>();
+                // weaponController.muzzle = weaponController.verticalMuzzle;
+
+                // weapon.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90 * nextPosition));
+                // weapon.position = transform.position + upPosition;
+                currentPosition = new Vector3(0f, nextPosition);
+
+                animator.SetBool("RunningHorizontal", false);
+            }
+            else {
+                animator.SetBool("RunningHorizontal", false);
+                animator.SetBool("RunningUp", false);
+                animator.SetBool("RunningDown", false);
+            }
         }
-        else {
-            animator.SetBool("RunningHorizontal", false);
-            animator.SetBool("RunningUp", false);
-            animator.SetBool("RunningDown", false);
-        }
+
+        weapon.GetComponent<WeaponController>().heroPosition = currentPosition;
     }
 }

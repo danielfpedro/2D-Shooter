@@ -4,27 +4,51 @@ using UnityEngine;
 
 public class WeaponController : MonoBehaviour
 {
-    public float damage = 4.5f;
-    public LayerMask canBeShoted;
+    [Header("Layers")]
+    public LayerMask canBeShooted;
+    [Header("Damge")]
+    public float damage = 5f;
 
-    public SpriteRenderer verticalMuzzle;
-    public SpriteRenderer horizontalMuzzle;
+    [Header("Visual Weapons")]
+    public SpriteRenderer[] weaponsVisuals = new SpriteRenderer[3];
+    private SpriteRenderer[] muzzlesVisuals = new SpriteRenderer[3];
+    private Light[] lightVisuals = new Light[3];
+    public int currentVisualWeaponIndex = 0;
+    /**
+    public SpriteRenderer weaponUp;
+    private SpriteRenderer weaponUpMuzzle;
+
+    public SpriteRenderer weaponDown;
+    private SpriteRenderer weaponDownMuzzle;
+
+    public SpriteRenderer weaponHorizontal;
+    private SpriteRenderer weaponHorizontalMuzzle;**/
+
+    [HideInInspector]
     public SpriteRenderer muzzle;
 
-    // private AudioSource audioSource;
+    [Header("Audio")]
     public AudioClip audioClip;
+    public bool mute = false;
 
+    [Header("Rate")]
     [Range(0.1f, 30f)]
     public float fireRate = 10f;
-    public float nextFire;
 
-    public bool mute = false;
+    private float nextFire;
+
+    public Vector2 heroPosition;
 
     void Start()
     {
-        verticalMuzzle.enabled = false;
-        horizontalMuzzle.enabled = false;
-        muzzle = horizontalMuzzle;
+        for (int i = 0; i < weaponsVisuals.Length; i++)
+        {
+            muzzlesVisuals[i] = weaponsVisuals[i].transform.GetChild(0).GetComponent<SpriteRenderer>();
+            muzzlesVisuals[i].enabled = false;
+
+            lightVisuals[i] = weaponsVisuals[i].transform.GetChild(1).GetComponent<Light>();
+            lightVisuals[i].enabled = false;
+        }
     }
 
     void Update()
@@ -38,8 +62,26 @@ public class WeaponController : MonoBehaviour
         if (Input.GetButton("Fire1") && Time.time >= nextFire)
         {
             nextFire = Time.time + 1f / fireRate;
-            muzzle.enabled = false;
+            // muzzle.enabled = false;
             StartCoroutine(Shoot());
+        }
+
+        for (int i = 0; i < weaponsVisuals.Length; i++)
+        {
+            weaponsVisuals[i].enabled = false;
+            // muzzlesVisuals[i].enabled = false;
+        }
+
+        if (heroPosition.x != 0)
+        {
+            weaponsVisuals[0].enabled = true;
+            currentVisualWeaponIndex = 0;
+        } else if (heroPosition.y > 0) {
+            weaponsVisuals[1].enabled = true;
+            currentVisualWeaponIndex = 1;
+        } else if (heroPosition.y < 0) {
+            weaponsVisuals[2].enabled = true;
+            currentVisualWeaponIndex = 2;
         }
     }
 
@@ -56,7 +98,7 @@ public class WeaponController : MonoBehaviour
             Destroy(audioSource, audioClip.length);
         }
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, canBeShoted);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.right, canBeShooted);
 
         if (hit)
         {
@@ -70,10 +112,17 @@ public class WeaponController : MonoBehaviour
         } else {
         }
 
-        muzzle.enabled = true;
+        // Quando executar o async a index podeter mduado entao e gente faz um cache aqui.
+        int toEnd = currentVisualWeaponIndex;
+        muzzlesVisuals[toEnd].enabled = true;
+        lightVisuals[toEnd].enabled = true;
+        Vector3 thePosition = lightVisuals[toEnd].transform.position;
+        thePosition.z = -.2f;
+        lightVisuals[toEnd].transform.position = thePosition;
 
         yield return .5f;
 
-        muzzle.enabled = false;
+        muzzlesVisuals[toEnd].enabled = false;
+        lightVisuals[toEnd].enabled = false;
     }
 }
