@@ -57,6 +57,10 @@
      <Compile Include="Assets\CameraController.cs" />
      <Compile Include="Assets\HealthManager.cs" />
      <Compile Include="Assets\HeroController.cs" />
+     <Compile Include="Assets\PathFinding\2dTileBasedPathFinding\Grid.cs" />
+     <Compile Include="Assets\PathFinding\2dTileBasedPathFinding\Node.cs" />
+     <Compile Include="Assets\PathFinding\2dTileBasedPathFinding\PathFinding.cs" />
+     <Compile Include="Assets\PathFinding\2dTileBasedPathFinding\Point.cs" />
      <Compile Include="Assets\SolidObject.cs" />
      <Compile Include="Assets\WeaponController.cs" />
  <Reference Include="Unity.ProGrids">
