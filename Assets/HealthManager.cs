@@ -20,36 +20,81 @@ public class HealthManager : MonoBehaviour
     NesScripts.Controls.PathFind.Point _from;
     NesScripts.Controls.PathFind.Point _to;
 
+    public GameObject tilemapDebug;
+
+    private GameObject[,] myGrid = new GameObject[30,30];
+    public GameObject tile;
+    public GameObject tilePath;
+    public GameObject tileBlock;
+
+    public Transform target;
+
+    bool[,] tilesmap = new bool[30, 30];
+
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = maxHealth;
 
-        bool[,] tilesmap = new bool[100, 100];
-        for (int i = 0; i < 100; i++)
+        
+        for (int x = 0; x < 30; x++)
         {
-            for (int y = 0; y < 100; y++)
+            for (int y = 0; y < 30; y++)
             {
-                tilesmap[i, y] = true;
+                bool isBlock = Random.Range(1, 10) == 1;
+                tilesmap[x, y] = !isBlock;
+
+                myGrid[x, y] = Instantiate(isBlock ? tileBlock : tile) as GameObject;
+                myGrid[x, y].transform.position = new Vector3(x, y, 0);
+
             }
         }
 
         grid = new NesScripts.Controls.PathFind.Grid(tilesmap);
 
         _from = new NesScripts.Controls.PathFind.Point(1, 1);
-        _to = new NesScripts.Controls.PathFind.Point(50, 50);
+        _to = new NesScripts.Controls.PathFind.Point(15, 15);
+
+        // List<NesScripts.Controls.PathFind.Point> path = NesScripts.Controls.PathFind.Pathfinding.FindPath(grid, _from, _to);
+
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        List<NesScripts.Controls.PathFind.Point> path = NesScripts.Controls.PathFind.Pathfinding.FindPath(grid, _from, _to);
+        NesScripts.Controls.PathFind.Point theFrom = new NesScripts.Controls.PathFind.Point((int)transform.position.x, (int)transform.position.y);
+        NesScripts.Controls.PathFind.Point theTo = new NesScripts.Controls.PathFind.Point((int)target.position.x, (int)target.position.y);
+
+        List<NesScripts.Controls.PathFind.Point> path = NesScripts.Controls.PathFind.Pathfinding.FindPath(grid, theFrom, theTo);
+        // Debug.Log("Path Count" + path.Count);
+
+        for (int x = 0; x < 30; x++)
+        {
+            for (int y = 0; y < 30; y++)
+            {
+                if (tilesmap[x,y])
+                {
+                    myGrid[x, y].GetComponent<SpriteRenderer>().sprite = tile.GetComponent<SpriteRenderer>().sprite;
+                }
+            }
+        }
+        for (int i = 0; i < path.Count; i++)
+        {
+            myGrid[path[i].x, path[i].y].GetComponent<SpriteRenderer>().sprite = tilePath.GetComponent<SpriteRenderer>().sprite;
+        }
+        if (path.Count > 0)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(path[0].x, path[0].y, 0), .05f);
+        }
+        
 
         if (Time.time >= nextMove)
         {
             nextMove = Time.time + 1f / moveRate;
-            transform.position = Vector3.Lerp(transform.position, new Vector3(path[nextIndex].x, path[nextIndex].y, transform.position.z), .2f);
-            nextIndex++;
+            // transform.position = Vector3.Lerp(transform.position, new Vector3(path[nextIndex].x, path[nextIndex].y, transform.position.z), .2f);
+            // nextIndex++;
         }
 
         if (currentHealth <= 0)
